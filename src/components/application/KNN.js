@@ -100,19 +100,7 @@ class KNN extends Component {
           axios({
             method: "post",
             url: serv_url + "/knn",
-            data: {
-              age: parseInt(values.age),
-              height: parseInt(values.height),
-              weight: parseInt(values.weight),
-              gender: parseInt(values.gender),
-              sbp: parseInt(values.sbp),
-              dbp: parseInt(values.dbp),
-              cholesterol: parseInt(values.cholesterol),
-              glucose: parseInt(values.glucose),
-              smoking: values.smoking ? 1 : 0,
-              alcohol_consume: values.alcohol_consume ? 1 : 0,
-              physical_activity: values.physical_activity ? 1 : 0,
-            },
+            data: { person },
           }).then((res) => {
             this.setState({ data: res.data });
             console.log(res);
