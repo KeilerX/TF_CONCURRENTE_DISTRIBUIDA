@@ -1,3 +1,3 @@
-[submodule "frotend"]
-	path = frotend
+[submodule "frontend"]
+	path = frontend
 	url = https://github.com/KeilerX/TF_CONCURRENTE_DISTRIBUIDA
