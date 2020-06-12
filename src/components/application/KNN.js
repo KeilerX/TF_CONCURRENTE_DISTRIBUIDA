@@ -11,7 +11,7 @@ const PersonSchema = yup.object({
     .required("La edad es requerida.")
     .integer()
     .lessThan(101, "La edad máxima es 100 años")
-    .moreThan(17, "La edad mínima es 18 años"),
+    .moreThan(29, "La edad mínima es 30 años"),
   height: yup
     .number()
     .required("La altura es requerida")
@@ -126,8 +126,9 @@ class KNN extends Component {
             data: { person, algorithm, k },
           }).then((res) => {
             this.setState({ data: res.data });
-            console.log(res);
-            console.log(res.data);
+            res.data.clase === 1
+              ? alert("Usted puede sufrir de un ataque al corazón")
+              : alert("Usted esta a salvo por ahora");
           });
           /* axios.post("http://localhost:8000/knn", { person }).then((res) => {
             this.setState({ data: res.data });
