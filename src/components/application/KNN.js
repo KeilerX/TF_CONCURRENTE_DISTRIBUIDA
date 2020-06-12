@@ -61,8 +61,8 @@ class KNN extends Component {
   state = {
     data: [],
     algorithm: 0,
-    is_knn: false,
-    is_kmeans: false,
+    is_knnmono: false,
+    is_knnmulti: false,
     k: 0,
   };
 
@@ -71,9 +71,9 @@ class KNN extends Component {
       [e.target.id]: parseInt(e.target.value),
     });
     if (parseInt(e.target.value) === 1 && e.target.id === "algorithm") {
-      this.setState({ is_knn: true, is_kmeans: false, k: null });
+      this.setState({ is_knnmono: true, is_knnmulti: false, k: null });
     } else if (parseInt(e.target.value) === 2 && e.target.id === "algorithm") {
-      this.setState({ is_knn: false, is_kmeans: true, k: null });
+      this.setState({ is_knnmono: false, is_knnmulti: true, k: null });
     }
   };
 
@@ -351,18 +351,7 @@ class KNN extends Component {
                           value={1}
                           /* checked={this.state.algorithm === 1} */
                         />
-                        <span>KNN</span>
-                        {this.state.is_knn && (
-                          <div className="input-field">
-                            <label htmlFor="k">Número de vecinos</label>
-                            <input
-                              type="number"
-                              id="k"
-                              onChange={this.handleChange}
-                              value={this.state.k || ""}
-                            />
-                          </div>
-                        )}
+                        <span>KNN Mono-hilo</span>
                       </label>
                     </div>
                     <div>
@@ -375,18 +364,16 @@ class KNN extends Component {
                           value={2}
                           /* checked={this.state.algorithm === 2} */
                         />
-                        <span>KMeans</span>
-                        {this.state.is_kmeans && (
-                          <div className="input-field">
-                            <label htmlFor="k">Número de clusters</label>
-                            <input
-                              type="number"
-                              id="k"
-                              onChange={this.handleChange}
-                              value={this.state.k || ""}
-                            />
-                          </div>
-                        )}
+                        <span>KNN Multi-hilo</span>
+                        <div className="input-field">
+                          <label htmlFor="k">Número de vecinos</label>
+                          <input
+                            type="number"
+                            id="k"
+                            onChange={this.handleChange}
+                            value={this.state.k || ""}
+                          />
+                        </div>
                       </label>
                     </div>
                   </label>
