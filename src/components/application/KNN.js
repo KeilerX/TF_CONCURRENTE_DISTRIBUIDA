@@ -60,7 +60,28 @@ const PersonSchema = yup.object({
 class KNN extends Component {
   state = {
     data: [],
+    algorithm: 0,
+    is_knn: false,
+    is_kmeans: false,
+    k: 0,
   };
+
+  handleChange = (e) => {
+    this.setState({
+      [e.target.id]: parseInt(e.target.value),
+    });
+    if (parseInt(e.target.value) === 1 && e.target.id === "algorithm") {
+      this.setState({ is_knn: true, is_kmeans: false, k: null });
+    } else if (parseInt(e.target.value) === 2 && e.target.id === "algorithm") {
+      this.setState({ is_knn: false, is_kmeans: true, k: null });
+    }
+  };
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(this.state);
+  };
+
   render() {
     const { auth } = this.props;
     if (!auth.uid) return <Redirect to="/signin" />;
@@ -95,12 +116,14 @@ class KNN extends Component {
             alcohol_consume: values.alcohol_consume ? 1 : 0,
             physical_activity: values.physical_activity ? 1 : 0,
           };
-          console.log(person);
           const serv_url = "http://localhost:8000";
+          const algorithm = this.state.algorithm; // 1 knn , 2 kmeans
+          const k = this.state.k;
+          console.log({ person, algorithm, k });
           axios({
             method: "post",
             url: serv_url + "/knn",
-            data: { person },
+            data: { person, algorithm, k },
           }).then((res) => {
             this.setState({ data: res.data });
             console.log(res);
@@ -313,9 +336,69 @@ class KNN extends Component {
                 <span>¿Realiza alguna activida física?</span>
               </label>
             </div>
-            <button type="submit" className="btn pink lighten-1 z-depth-0">
-              Resultado
-            </button>
+            <div className="card">
+              <div className="card-content">
+                <div className="card-title">Seleccione un algoritmo</div>
+                <div className="">
+                  <label htmlFor="algorithm">
+                    <div>
+                      <label>
+                        <input
+                          type="radio"
+                          name="algorithm"
+                          id="algorithm"
+                          onChange={this.handleChange}
+                          value={1}
+                          /* checked={this.state.algorithm === 1} */
+                        />
+                        <span>KNN</span>
+                        {this.state.is_knn && (
+                          <div className="input-field">
+                            <label htmlFor="k">Número de vecinos</label>
+                            <input
+                              type="number"
+                              id="k"
+                              onChange={this.handleChange}
+                              value={this.state.k || ""}
+                            />
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                    <div>
+                      <label>
+                        <input
+                          type="radio"
+                          name="algorithm"
+                          id="algorithm"
+                          onChange={this.handleChange}
+                          value={2}
+                          /* checked={this.state.algorithm === 2} */
+                        />
+                        <span>KMeans</span>
+                        {this.state.is_kmeans && (
+                          <div className="input-field">
+                            <label htmlFor="k">Número de clusters</label>
+                            <input
+                              type="number"
+                              id="k"
+                              onChange={this.handleChange}
+                              value={this.state.k || ""}
+                            />
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div className="card-action grey lighten-4 grey-">
+                <button type="submit" className="btn pink lighten-1 z-depth-0">
+                  Resultado
+                </button>
+              </div>
+            </div>
+
             {/* {this.state.data &&
               this.state.data.map((d) => {
                 return (
