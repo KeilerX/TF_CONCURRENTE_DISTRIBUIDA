@@ -466,7 +466,7 @@ type body struct {
 
 type body2 struct {
 	K     int `json:"k"`
-	MaxIt int `json:max_it`
+	MaxIt int `json:"max_it"`
 }
 
 type res struct {
@@ -567,7 +567,7 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 				Smoking: centers[i][8], AlcoholConsume: centers[i][9], PhysicalActivity: centers[i][10]})
 		}
 	}
-	fmt.Println(centers)
+	fmt.Println(centroids)
 	fmt.Println(ncentroid)
 	response := res2{Centroids: centroids, Ncentroid: ncentroid}
 	jsonResponse, err := json.Marshal(response)
