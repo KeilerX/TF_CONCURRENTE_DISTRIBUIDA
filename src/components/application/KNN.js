@@ -72,7 +72,12 @@ class KNN extends Component {
       [e.target.id]: parseInt(e.target.value),
     });
     if (parseInt(e.target.value) === 1 && e.target.id === "algorithm") {
-      this.setState({ is_knnmono: true, is_knnmulti: false, k: null });
+      this.setState({
+        is_knnmono: true,
+        is_knnmulti: false,
+        k: null,
+        n_threads: null,
+      });
     } else if (parseInt(e.target.value) === 2 && e.target.id === "algorithm") {
       this.setState({ is_knnmono: false, is_knnmulti: true, k: null });
     }
