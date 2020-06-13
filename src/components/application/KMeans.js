@@ -8,7 +8,7 @@ class KMeans extends Component {
     data: [],
     k: 0,
     centroids: [],
-    items_centroid: [300, 100, 200],
+    items_centroid: [],
   };
 
   handleChange = (e) => {
@@ -44,6 +44,7 @@ class KMeans extends Component {
   };
 
   handleSubmit = (e) => {
+    this.setState({ centroids: [], items_centroid: [] });
     e.preventDefault();
     const serv_url = "http://localhost:8000";
     const k = this.state.k;
@@ -53,9 +54,10 @@ class KMeans extends Component {
       url: serv_url + "/kmeans",
       data: { k },
     }).then((res) => {
+      console.log(res);
       this.setState({
-        centroids: res.data.centroid,
-        items_centroid: res.data.items_centroid,
+        centroids: res.data.centroids,
+        items_centroid: res.data.ncentroid,
       });
     });
   };
@@ -102,16 +104,17 @@ class KMeans extends Component {
                 return (
                   <div key={i}>
                     <p>
-                      Centroide {c.id + 1} con {this.state.items_centroid[i]}{" "}
+                      Centroide {i + 1} con {this.state.items_centroid[i]}{" "}
                       registros
                     </p>
                     <p>
-                      Edad: {c.age}(años), Altura: {c.height}(cm), Peso:{" "}
-                      {c.weight}(kg), Género:{" "}
-                      {c.gender === 1 ? "Mujer" : "Hombre"}, Presión arterial
-                      sitólica: {c.sbp}, Presión arterial diastólica: {c.dbp},
-                      Colesterol:{" "}
-                      {c.cholesterol === 1
+                      Edad: {parseInt(c.age)}(años), Altura:{" "}
+                      {parseInt(c.height)}(cm), Peso: {parseInt(c.weight)}
+                      (kg), Género:{" "}
+                      {parseInt(c.gender) === 1 ? "Mujer" : "Hombre"}, Presión
+                      arterial sitólica: {parseInt(c.sbp)}, Presión arterial
+                      diastólica: {parseInt(c.dbp)}, Colesterol:{" "}
+                      {parseInt(c.cholesterol) === 1
                         ? "Normal"
                         : c.cholesterol === 2
                         ? "Por encima de lo normal"
@@ -119,7 +122,7 @@ class KMeans extends Component {
                       , Glucosa:{" "}
                       {c.glucose === 1
                         ? "Normal"
-                        : c.cholesterol === 2
+                        : parseInt(c.cholesterol) === 2
                         ? "Por encima de lo normal"
                         : "Muy por encima de lo normal"}
                       , {c.smoking === 1 ? "Fuma" : "No fuma"},{" "}
