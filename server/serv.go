@@ -355,6 +355,9 @@ func multiKMeans(dftemp [][]float32, k int, maxIt int) ([]int, [][]float32, int)
 	n := len(dftemp)
 	ncols := len(dftemp[0])
 	centers := make([][]float32, k)
+	for i := 0; i < k; i++ {
+		centers[i] = make([]float32, ncols)
+	}
 	G := make([]int, n)
 	rc := make(map[int]struct{})
 	it := 0
@@ -362,13 +365,13 @@ func multiKMeans(dftemp [][]float32, k int, maxIt int) ([]int, [][]float32, int)
 		r := rand.Intn(n - 1)
 		rc[r] = struct{}{}
 	}
+	temp := 0
 	for i := range rc {
-		centers[i] = make([]float32, ncols)
 		for j := 0; j < ncols; j++ {
-			centers[i][j] = dftemp[i][j]
+			centers[temp][j] = dftemp[i][j]
 		}
+		temp++
 	}
-
 	for repeat := false; !repeat && it < maxIt; {
 		GCh := make(chan []int, 1)
 		idCh := make(chan int, 1)
@@ -524,6 +527,7 @@ func knnRequest(r http.ResponseWriter, request *http.Request) {
 
 func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 	var bdy body2
+	fmt.Println("EMPIEZA DECODER")
 	err := json.NewDecoder(request.Body).Decode(&bdy)
 	if err != nil {
 		http.Error(r, err.Error(), http.StatusBadRequest)
@@ -538,6 +542,7 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 		copy(dftemp[i], xTrain[i])
 	}
 	maxIt := 100
+	fmt.Println("EMPEIZA KMEANS")
 	G, centers, _ := multiKMeans(dftemp, k, maxIt)
 	ocurs := make(map[int]int)
 	ncentroid := make([]int, k)
@@ -559,6 +564,8 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 			Dbp: centers[i][5], Cholesterol: centers[i][6], Glucose: centers[i][7],
 			Smoking: centers[i][8], AlcoholConsume: centers[i][9], PhysicalActivity: centers[i][10]}
 	}
+	fmt.Println(centers)
+	fmt.Println(ncentroid)
 	response := res2{Centroids: centroids, Ncentroid: ncentroid}
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
@@ -571,7 +578,7 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
-	colnames, col, data = readCsvFile("../cardio_train.csv")
+	colnames, col, data = readCsvFile("cardio_train.csv")
 	_, _, xTrain = sliceCols(colnames, col, data, colnames[1:len(colnames)-1])
 	_, _, yTrain = sliceCols(colnames, col, data, []string{colnames[len(colnames)-1]})
 
