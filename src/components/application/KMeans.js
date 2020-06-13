@@ -9,6 +9,7 @@ class KMeans extends Component {
     k: 0,
     centroids: [],
     items_centroid: [],
+    max_it: 0,
   };
 
   handleChange = (e) => {
@@ -48,11 +49,12 @@ class KMeans extends Component {
     e.preventDefault();
     const serv_url = "http://localhost:8000";
     const k = this.state.k;
+    const max_it = this.state.max_it;
     console.log({ k });
     axios({
       method: "post",
       url: serv_url + "/kmeans",
-      data: { k },
+      data: { k, max_it },
     }).then((res) => {
       console.log(res);
       this.setState({
@@ -86,7 +88,18 @@ class KMeans extends Component {
             El número de centroides debe estar entre 1 y 5
           </label>
         ) : null}
+
         <div>
+          <div className="input-field">
+            <label htmlFor="max_it">Máximo de iteraciones</label>
+            {/* Máximo de iteraciones */}
+            <input
+              type="number"
+              id="max_it"
+              value={this.state.max_it || ""}
+              onChange={this.handleChange}
+            />
+          </div>
           <div>
             <button className="btn pink lighten-1 z-depth-0">Resultado</button>
           </div>
