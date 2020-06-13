@@ -30,20 +30,13 @@ exports.dataCreated = functions.firestore
     return createNotification(notification);
   });
 
-exports.userJoined = functions.auth.user().onCreate((user) => {
-  return admin
-    .firestore()
-    .collection("users")
-    .doc(user.uid)
-    .get()
-    .then((doc) => {
-      const newUser = doc.data();
-      const notification = {
-        content: "Se unió",
-        user: `${newUser.firstName} ${newUser.lastName}`,
-        time: admin.firestore.FieldValue.serverTimestamp(),
-      };
-
-      return createNotification(notification);
-    });
+exports.userJoined = functions.auth.user().onCreate(async (user) => {
+  const doc = await admin.firestore().collection("users").doc(user.uid).get();
+  const newUser = doc.data();
+  const notification = {
+    content: "Se unió",
+    user: `${newUser.firstName} ${newUser.lastName}`,
+    time: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  return createNotification(notification);
 });

@@ -8,6 +8,7 @@ class KMeans extends Component {
     data: [],
     k: 0,
     centroids: [],
+    items_centroid: [300, 100, 200],
   };
 
   handleChange = (e) => {
@@ -35,16 +36,28 @@ class KMeans extends Component {
         alcohol_consume: Math.random() >= 0.5 ? 1 : 0,
         physical_activity: Math.random() >= 0.5 ? 1 : 0,
       };
+      this.setState((prevState) => {
+        prevState.centroids = [...prevState.centroids, centroid];
+      });
       console.log(centroid);
-      this.setState((prevState) => ({
-        centroids: [...prevState.centroids, centroid],
-      }));
     }
   };
 
   handleSubmit = (e) => {
     e.preventDefault();
-    console.log(this.state);
+    const serv_url = "http://localhost:8000";
+    const k = this.state.k;
+    console.log({ k });
+    axios({
+      method: "post",
+      url: serv_url + "/kmeans",
+      data: { k },
+    }).then((res) => {
+      this.setState({
+        centroids: res.data.centroid,
+        items_centroid: res.data.items_centroid,
+      });
+    });
   };
 
   render() {
@@ -72,50 +85,56 @@ class KMeans extends Component {
           </label>
         ) : null}
         <div>
-          <button
-            onClick={this.generateCentroids}
-            className="btn blue darken-2 z-depth-0"
-          >
-            Generar Centroides
-          </button>
           <div>
-            {this.state.centroids.map((c) => {
-              return (
-                <div key={c.id}>
-                  <p>Centroide {c.id + 1}</p>
-                  <p>
-                    Edad: {c.age}(años), Altura: {c.height}(cm), Peso:{" "}
-                    {c.weight}(kg), Género:{" "}
-                    {c.gender === 1 ? "Mujer" : "Hombre"}, Presión arterial
-                    sitólica: {c.sbp}, Presión arterial diastólica: {c.dbp},
-                    Colesterol:{" "}
-                    {c.cholesterol === 1
-                      ? "Normal"
-                      : c.cholesterol === 2
-                      ? "Por encima de lo normal"
-                      : "Muy por encima de lo normal"}
-                    , Glucosa:{" "}
-                    {c.glucose === 1
-                      ? "Normal"
-                      : c.cholesterol === 2
-                      ? "Por encima de lo normal"
-                      : "Muy por encima de lo normal"}
-                    , {c.smoking === 1 ? "Fuma" : "No fuma"},{" "}
-                    {c.alcohol_consume === 1
-                      ? "Consume alcohol"
-                      : "No consume alcohol"}
-                    ,{" "}
-                    {c.physical_activity === 1
-                      ? "Realiza actividad física"
-                      : "No realiza actividad física"}
-                  </p>
-                </div>
-              );
-            })}
+            <button className="btn pink lighten-1 z-depth-0">Resultado</button>
           </div>
-        </div>
-        <div>
-          <button className="btn pink lighten-1 z-depth-0">Resultado</button>
+          {/* <div>
+            <button
+              onClick={this.generateCentroids}
+              className="btn green lighten-1 z-depth-0"
+            >
+              Generar Centroides
+            </button>
+          </div> */}
+          <div>
+            {this.state.centroids &&
+              this.state.centroids.map((c, i) => {
+                return (
+                  <div key={i}>
+                    <p>
+                      Centroide {c.id + 1} con {this.state.items_centroid[i]}{" "}
+                      registros
+                    </p>
+                    <p>
+                      Edad: {c.age}(años), Altura: {c.height}(cm), Peso:{" "}
+                      {c.weight}(kg), Género:{" "}
+                      {c.gender === 1 ? "Mujer" : "Hombre"}, Presión arterial
+                      sitólica: {c.sbp}, Presión arterial diastólica: {c.dbp},
+                      Colesterol:{" "}
+                      {c.cholesterol === 1
+                        ? "Normal"
+                        : c.cholesterol === 2
+                        ? "Por encima de lo normal"
+                        : "Muy por encima de lo normal"}
+                      , Glucosa:{" "}
+                      {c.glucose === 1
+                        ? "Normal"
+                        : c.cholesterol === 2
+                        ? "Por encima de lo normal"
+                        : "Muy por encima de lo normal"}
+                      , {c.smoking === 1 ? "Fuma" : "No fuma"},{" "}
+                      {c.alcohol_consume === 1
+                        ? "Consume alcohol"
+                        : "No consume alcohol"}
+                      ,{" "}
+                      {c.physical_activity === 1
+                        ? "Realiza actividad física"
+                        : "No realiza actividad física"}
+                    </p>
+                  </div>
+                );
+              })}
+          </div>
         </div>
       </form>
     );

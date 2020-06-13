@@ -20,7 +20,7 @@ export const signOut = () => {
       .auth()
       .signOut()
       .then(() => {
-        dispatch({ type: "SIGN_OUT_SUCCESS" });
+        dispatch({ type: "SIGNOUT_SUCCESS" });
       });
   };
 };
@@ -33,10 +33,10 @@ export const signUp = (newUser) => {
     firebase
       .auth()
       .createUserWithEmailAndPassword(newUser.email, newUser.password)
-      .then((res) => {
+      .then((resp) => {
         return firestore
           .collection("users")
-          .doc(res.user.uid)
+          .doc(resp.user.uid)
           .set({
             firstName: newUser.firstName,
             lastName: newUser.lastName,
@@ -44,10 +44,10 @@ export const signUp = (newUser) => {
           });
       })
       .then(() => {
-        dispatch({ type: "SIGN_UP_SUCCESS" });
+        dispatch({ type: "SIGNUP_SUCCESS" });
       })
       .catch((err) => {
-        dispatch({ type: "SIGN_UP_ERROR", err });
+        dispatch({ type: "SIGNUP_ERROR", err });
       });
   };
 };

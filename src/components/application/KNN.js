@@ -123,7 +123,7 @@ class KNN extends Component {
             physical_activity: values.physical_activity ? 1 : 0,
           };
           const serv_url = "http://localhost:8000";
-          const algorithm = this.state.algorithm; // 1 knn , 2 kmeans
+          const algorithm = this.state.algorithm; // 1 knn mono-hilo , 2 knn multi-hilo
           const k = this.state.k;
           const n_threads = this.state.n_threads;
           console.log({ person, algorithm, k, n_threads });
