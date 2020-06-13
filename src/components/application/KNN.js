@@ -134,8 +134,18 @@ class KNN extends Component {
           }).then((res) => {
             this.setState({ data: res.data });
             res.data.clase === 1
-              ? alert("Usted puede sufrir de un ataque al corazón")
-              : alert("Usted esta a salvo por ahora");
+              ? alert(
+                  "Usted puede sufrir de un ataque al corazón. Ocurrencias de la clase sana: " +
+                    res.data.ocurs0 +
+                    ", ocurrencias de la clase enferma: " +
+                    res.data.ocurs1
+                )
+              : alert(
+                  "Usted esta a salvo por ahora. Ocurrencias de la clase sana: " +
+                    res.data.ocurs0 +
+                    ", ocurrencias de la clase enferma: " +
+                    res.data.ocurs1
+                );
           });
           /* axios.post("http://localhost:8000/knn", { person }).then((res) => {
             this.setState({ data: res.data });
