@@ -465,7 +465,8 @@ type body struct {
 }
 
 type body2 struct {
-	K int `json:"k"`
+	K     int `json:"k"`
+	MaxIt int `json:max_it`
 }
 
 type res struct {
@@ -541,12 +542,12 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 		dftemp[i] = make([]float32, len(xTrain[i]))
 		copy(dftemp[i], xTrain[i])
 	}
-	maxIt := 100
+	maxIt := bdy.MaxIt
 	fmt.Println("EMPEIZA KMEANS")
 	G, centers, _ := multiKMeans(dftemp, k, maxIt)
 	ocurs := make(map[int]int)
-	ncentroid := make([]int, k)
-	centroids := make([]person, k)
+	var ncentroid []int
+	var centroids []person
 	for _, clase := range G {
 		if _, found := ocurs[clase]; !found {
 			ocurs[clase] = 1
@@ -554,15 +555,17 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 			ocurs[clase]++
 		}
 	}
-	for key, val := range ocurs {
-		ncentroid[key] = val
+	for _, val := range ocurs {
+		ncentroid = append(ncentroid, val)
 	}
 
 	for i := 0; i < k; i++ {
-		centroids[i] = person{Age: centers[i][0], Height: centers[i][1],
-			Weight: centers[i][2], Gender: centers[i][3], Sbp: centers[i][4],
-			Dbp: centers[i][5], Cholesterol: centers[i][6], Glucose: centers[i][7],
-			Smoking: centers[i][8], AlcoholConsume: centers[i][9], PhysicalActivity: centers[i][10]}
+		if !math.IsNaN(float64(centers[i][0])) {
+			centroids = append(centroids, person{Age: centers[i][0], Height: centers[i][1],
+				Weight: centers[i][2], Gender: centers[i][3], Sbp: centers[i][4],
+				Dbp: centers[i][5], Cholesterol: centers[i][6], Glucose: centers[i][7],
+				Smoking: centers[i][8], AlcoholConsume: centers[i][9], PhysicalActivity: centers[i][10]})
+		}
 	}
 	fmt.Println(centers)
 	fmt.Println(ncentroid)
