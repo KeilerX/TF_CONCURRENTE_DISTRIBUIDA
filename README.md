@@ -1,5 +1,6 @@
-Projecto realizado en [Create React App](https://github.com/facebook/create-react-app).
+Projecto realizado con [React App](https://github.com/facebook/create-react-app).
 
+# Para la TA2:
 ## Scripts disponibles
 En este projecto:
 
