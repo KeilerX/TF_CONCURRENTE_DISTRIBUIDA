@@ -64,6 +64,7 @@ class KNN extends Component {
     is_knnmono: false,
     is_knnmulti: false,
     k: 0,
+    n_threads: 0,
   };
 
   handleChange = (e) => {
@@ -119,11 +120,12 @@ class KNN extends Component {
           const serv_url = "http://localhost:8000";
           const algorithm = this.state.algorithm; // 1 knn , 2 kmeans
           const k = this.state.k;
-          console.log({ person, algorithm, k });
+          const n_threads = this.state.n_threads;
+          console.log({ person, algorithm, k, n_threads });
           axios({
             method: "post",
             url: serv_url + "/knn",
-            data: { person, algorithm, k },
+            data: { person, algorithm, k, n_threads },
           }).then((res) => {
             this.setState({ data: res.data });
             res.data.clase === 1
@@ -147,7 +149,7 @@ class KNN extends Component {
           setFieldValue,
         }) => (
           <form onSubmit={handleSubmit} className="blue lighten-4">
-            <h5 className="grey-text text-darken-3">KNN Algorithm</h5>
+            <h5 className="grey-text text-darken-3">Algoritmo KNN</h5>
             <div className="input-field">
               <label htmlFor="age">Edad (años)</label>
               {/* Age */}
@@ -375,6 +377,17 @@ class KNN extends Component {
                             value={this.state.k || ""}
                           />
                         </div>
+                        {this.state.is_knnmulti && (
+                          <div className="input-field">
+                            <label htmlFor="n_threads">Número de hilos</label>
+                            <input
+                              type="number"
+                              id="n_threads"
+                              onChange={this.handleChange}
+                              value={this.state.n_threads || ""}
+                            />
+                          </div>
+                        )}
                       </label>
                     </div>
                   </label>

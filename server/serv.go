@@ -239,7 +239,7 @@ func KNNrequest(response http.ResponseWriter, request *http.Request) {
 
 func main() {
 
-	colnames, col, data = readCsvFile("../cardio_train.csv")
+	colnames, col, data = readCsvFile("cardio_train.csv")
 	_, _, xTrain = sliceCols(colnames, col, data, colnames[1:len(colnames)-1])
 	_, _, yTrain = sliceCols(colnames, col, data, []string{colnames[len(colnames)-1]})
 
