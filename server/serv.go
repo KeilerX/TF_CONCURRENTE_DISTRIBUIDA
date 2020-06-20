@@ -484,6 +484,8 @@ var xTrainCovid [][]float32
 var yTrain [][]float32
 var yTrainCovid [][]float32
 
+var groupsSelected []pacient
+
 ////////////////           KNN
 
 type person struct {
@@ -732,7 +734,7 @@ func groupSelection(r http.ResponseWriter, request *http.Request) {
 	head(centers, 1)
 	ocurs := make(map[int]int)
 	var ncentroid []int
-	var centroids []pacient
+	groupsSelected = nil
 	for _, clase := range G {
 		if _, found := ocurs[clase]; !found {
 			ocurs[clase] = 1
@@ -748,30 +750,16 @@ func groupSelection(r http.ResponseWriter, request *http.Request) {
 		if !math.IsNaN(float64(centers[i][0])) {
 			for j := 0; j < len(centers[i]); j++ {
 				z := float64(centers[i][j])*std_scales[j] + mean_scales[j]
-				z2 := centers[i][j]*float32(std_scales[j]) + float32(mean_scales[j])
-				if z < 0 {
-					fmt.Println("")
-
-					fmt.Println(z)
-					fmt.Println(colnamesDiseases[j])
-					fmt.Println("centroide: ", centers[i][j])
-					fmt.Println("centroide64:", float64(centers[i][j]))
-					fmt.Println("std:  ", std_scales[j])
-					fmt.Println("mean: ", mean_scales[j])
-
-					fmt.Println(z2)
-					fmt.Print("\n\n")
-				}
 				centers[i][j] = float32(z)
 			}
-			centroids = append(centroids, pacient{Edad: centers[i][0], Genero: centers[i][1], CardioDisease: centers[i][2],
+			groupsSelected = append(groupsSelected, pacient{Edad: centers[i][0], Genero: centers[i][1], CardioDisease: centers[i][2],
 				Diabetes: centers[i][3], RespDisease: centers[i][4],
 				Hipertension: centers[i][5], Cancer: centers[i][6]})
 		}
 	}
-	fmt.Println(centroids)
+	fmt.Println(groupsSelected)
 	fmt.Println(ncentroid)
-	response := resDiseases{Centroids: centroids, Ncentroid: ncentroid}
+	response := resDiseases{Centroids: groupsSelected, Ncentroid: ncentroid}
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		http.Error(r, err.Error(), http.StatusBadRequest)
