@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gonum/stat"
+
 	"encoding/csv"
 	"encoding/json"
 
@@ -139,6 +141,31 @@ func normalize(data [][]float32) [][]float32 {
 	return data
 }
 
+func standarization(data [][]float32) ([][]float32, []float64, []float64) {
+	newdata := make([][]float32, len(data))
+	for i := 0; i < len(data); i++ {
+		newdata[i] = make([]float32, len(data[i]))
+	}
+	mean := make([]float64, len(data[0]))
+	std := make([]float64, len(data[0]))
+
+	for i := 0; i < len(data[0]); i++ {
+		column := make([]float64, len(data))
+		mean[i] = float64(0)
+		for j := 0; j < len(data); j++ {
+			column[j] = float64(data[j][i])
+			mean[i] += float64(data[j][i])
+		}
+		mean[i] = mean[i] / float64(len(data))
+		std[i] = stat.StdDev(column, nil)
+		for j := 0; j < len(data); j++ {
+			newdata[j][i] = (data[j][i] - float32(mean[i])) / float32(std[i])
+		}
+	}
+
+	return newdata, mean, std
+}
+
 ////////////           MULTI HILO
 func monoKNN(xTrain [][]float32, yTrain [][]float32, xTest []float32, k int) (float32, map[float32]int) {
 	distancias := make([][]float32, k)
@@ -217,6 +244,7 @@ func routineKNN(xTrain [][]float32, yTrain [][]float32, xTest []float32, k int, 
 			suma += (xTrain[i][j] - xTest[j]) * (xTrain[i][j] - xTest[j])
 		}
 		suma = float32(math.Sqrt(float64(suma)))
+
 		j := len(distancias) - 1
 		for ; j >= 0; j-- {
 
@@ -273,6 +301,7 @@ func multiKNN(xTrain [][]float32, yTrain [][]float32, xTest []float32, k int, ro
 		candidate := <-outCh
 		for ; j >= 0; j-- {
 			if distancias[j][0] <= candidate[0] {
+
 				temp := make([][]float32, k+1)
 				for m := 0; m < j+1; m++ {
 					temp[m] = make([]float32, 2)
@@ -439,16 +468,29 @@ func multiKMeans(dftemp [][]float32, k int, maxIt int) ([]int, [][]float32, int)
 // GLOBAL VARIABLES
 
 var colnames []string
+var colnamesCovid []string
+var colnamesDiseases []string
 var col map[string]int
+var colCovid map[string]int
+var colDiseases map[string]int
+
 var data [][]float32
+var dfCovid [][]float32
+var dfDiseases [][]float32
+
 var xTrain [][]float32
+var xTrainCovid [][]float32
+
 var yTrain [][]float32
+var yTrainCovid [][]float32
+
+////////////////           KNN
 
 type person struct {
 	Age              float32 `json:"age"`
+	Gender           float32 `json:"gender"`
 	Height           float32 `json:"height"`
 	Weight           float32 `json:"weight"`
-	Gender           float32 `json:"gender"`
 	Sbp              float32 `json:"sbp"`
 	Dbp              float32 `json:"dbp"`
 	Cholesterol      float32 `json:"cholesterol"`
@@ -457,6 +499,25 @@ type person struct {
 	AlcoholConsume   float32 `json:"alcohol_consume"`
 	PhysicalActivity float32 `json:"physical_activity"`
 }
+
+type testInput struct {
+	Edad            float32 `json:"edad"`
+	Genero          float32 `json:"genero"`
+	Tos             float32 `json:"tos"`
+	Temperatura     float32 `json:"temperatura"`
+	DolorGarganta   float32 `json:"dolor_garganta"`
+	MalestarGeneral float32 `json:"malestar_general"`
+}
+
+type pacient struct {
+	Edad          float32 `json:"edad"`
+	Genero        float32 `json:"genero"`
+	CardioDisease float32 `json:"cardio_disease"`
+	Diabetes      float32 `json:"diabetes"`
+	RespDisease   float32 `json:"resp_disease"`
+	Hipertension  float32 `json:"hipertension"`
+	Cancer        float32 `json:"cancer"`
+}
 type body struct {
 	Person    person `json:"person"`
 	Algorithm int    `json:"algorithm"`
@@ -464,9 +525,8 @@ type body struct {
 	Threads   int    `json:"n_threads"`
 }
 
-type body2 struct {
-	K     int `json:"k"`
-	MaxIt int `json:"max_it"`
+type bodyCovid struct {
+	TestInput testInput `json:"covid"`
 }
 
 type res struct {
@@ -475,9 +535,21 @@ type res struct {
 	Ocurs1 int `json:"ocurs1"`
 }
 
+/////////////////////           KMEANS
+
+type body2 struct {
+	K     int `json:"k"`
+	MaxIt int `json:"max_it"`
+}
+
 type res2 struct {
 	Centroids []person `json:"centroids"`
 	Ncentroid []int    `json:"ncentroid"`
+}
+
+type resDiseases struct {
+	Centroids []pacient `json:"centroids"`
+	Ncentroid []int     `json:"ncentroid"`
 }
 
 func knnRequest(r http.ResponseWriter, request *http.Request) {
@@ -499,11 +571,18 @@ func knnRequest(r http.ResponseWriter, request *http.Request) {
 		copy(dftemp[i], xTrain[i])
 	}
 	dftemp = append(dftemp, xTest)
-	dftemp = normalize(dftemp)
-	dftemp, xTest = dftemp[:len(yTrain)-1], dftemp[len(yTrain)-1]
+	//dftemp = normalize(dftemp)
+	dftemp, _, _ = standarization(dftemp)
+	newdftemp := make([][]float32, len(yTrain))
+	for i := 0; i < len(newdftemp); i++ {
+		newdftemp[i] = make([]float32, len(dftemp[0]))
+		copy(newdftemp[i], dftemp[i])
+	}
+	copy(xTest, dftemp[len(dftemp)-1])
+
 	if bdy.Algorithm == 1 {
 		//fmt.Fprintf(response, "%.0f", monoKNN(dftemp, yTrain, xTest, bdy.K))
-		clase, ocurs := monoKNN(dftemp, yTrain, xTest, bdy.K)
+		clase, ocurs := monoKNN(newdftemp, yTrain, xTest, bdy.K)
 		response := res{Clase: int(clase), Ocurs0: ocurs[0], Ocurs1: ocurs[1]}
 		jsonResponse, err := json.Marshal(response)
 		if err != nil {
@@ -514,7 +593,7 @@ func knnRequest(r http.ResponseWriter, request *http.Request) {
 		fmt.Fprintf(r, "%s", jsonResponse)
 	} else if bdy.Algorithm == 2 {
 		//fmt.Fprintf(response, "%.0f", monoKNN(dftemp, yTrain, xTest, bdy.K))
-		clase, ocurs := multiKNN(dftemp, yTrain, xTest, bdy.K, bdy.Threads)
+		clase, ocurs := multiKNN(newdftemp, yTrain, xTest, bdy.K, bdy.Threads)
 		response := res{Clase: int(clase), Ocurs0: ocurs[0], Ocurs1: ocurs[1]}
 		jsonResponse, err := json.Marshal(response)
 		if err != nil {
@@ -542,9 +621,12 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 		dftemp[i] = make([]float32, len(xTrain[i]))
 		copy(dftemp[i], xTrain[i])
 	}
+	dftemp, mean_scales, std_scales := standarization(dftemp)
 	maxIt := bdy.MaxIt
-	fmt.Println("EMPEIZA KMEANS")
+	fmt.Println("EMPIEZA KMEANS")
+	head(dftemp, 1)
 	G, centers, _ := multiKMeans(dftemp, k, maxIt)
+	head(centers, 1)
 	ocurs := make(map[int]int)
 	var ncentroid []int
 	var centroids []person
@@ -561,8 +643,11 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 
 	for i := 0; i < k; i++ {
 		if !math.IsNaN(float64(centers[i][0])) {
-			centroids = append(centroids, person{Age: centers[i][0], Height: centers[i][1],
-				Weight: centers[i][2], Gender: centers[i][3], Sbp: centers[i][4],
+			for j := 0; j < len(centers[i]); j++ {
+				centers[i][j] = float32(float64(centers[i][j])*std_scales[j] + mean_scales[j])
+			}
+			centroids = append(centroids, person{Age: centers[i][0], Gender: centers[i][1], Height: centers[i][2],
+				Weight: centers[i][3], Sbp: centers[i][4],
 				Dbp: centers[i][5], Cholesterol: centers[i][6], Glucose: centers[i][7],
 				Smoking: centers[i][8], AlcoholConsume: centers[i][9], PhysicalActivity: centers[i][10]})
 		}
@@ -578,12 +663,142 @@ func kmeansRequest(r http.ResponseWriter, request *http.Request) {
 	}
 	fmt.Fprintf(r, "%s", jsonResponse)
 }
+func covidAnalysis(r http.ResponseWriter, request *http.Request) {
+	var bdy bodyCovid
+	err := json.NewDecoder(request.Body).Decode(&bdy)
+	if err != nil {
+		http.Error(r, err.Error(), http.StatusBadRequest)
+		fmt.Println("ERROR GAA")
+		return
+	}
+	test := bdy.TestInput
+
+	K := 1000
+	Threads := 8
+
+	xTest := []float32{test.Edad, test.Genero, test.Tos, test.Temperatura, test.DolorGarganta,
+		test.MalestarGeneral}
+	fmt.Println(xTest)
+
+	dftemp := make([][]float32, len(xTrainCovid))
+	for i := range xTrainCovid {
+		dftemp[i] = make([]float32, len(xTrainCovid[i]))
+		copy(dftemp[i], xTrainCovid[i])
+	}
+	dftemp = append(dftemp, xTest)
+	//dftemp = normalize(dftemp)
+	dftemp, _, _ = standarization(dftemp)
+
+	newdftemp := make([][]float32, len(yTrainCovid))
+	for i := 0; i < len(newdftemp); i++ {
+		newdftemp[i] = make([]float32, len(dftemp[0]))
+		copy(newdftemp[i], dftemp[i])
+	}
+	copy(xTest, dftemp[len(dftemp)-1])
+
+	//fmt.Fprintf(response, "%.0f", monoKNN(dftemp, yTrain, xTest, bdy.K))
+	clase, ocurs := multiKNN(newdftemp, yTrainCovid, xTest, K, Threads)
+	response := res{Clase: int(clase), Ocurs0: ocurs[0], Ocurs1: ocurs[1]}
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		http.Error(r, err.Error(), http.StatusBadRequest)
+		fmt.Println("ERROR GAA")
+		return
+	}
+	fmt.Fprintf(r, "%s", jsonResponse)
+}
+
+func groupSelection(r http.ResponseWriter, request *http.Request) {
+	var bdy body2
+	fmt.Println("EMPIEZA DECODER")
+	err := json.NewDecoder(request.Body).Decode(&bdy)
+	if err != nil {
+		http.Error(r, err.Error(), http.StatusBadRequest)
+		fmt.Println("ERROR GAA")
+		return
+	}
+	k := bdy.K
+
+	dftemp := make([][]float32, len(dfDiseases))
+	for i := range dfDiseases {
+		dftemp[i] = make([]float32, len(dfDiseases[i]))
+		copy(dftemp[i], dfDiseases[i])
+	}
+	dftemp, mean_scales, std_scales := standarization(dftemp)
+	maxIt := bdy.MaxIt
+	fmt.Println("EMPIEZA KMEANS")
+	head(dftemp, 1)
+	G, centers, _ := multiKMeans(dftemp, k, maxIt)
+	head(centers, 1)
+	ocurs := make(map[int]int)
+	var ncentroid []int
+	var centroids []pacient
+	for _, clase := range G {
+		if _, found := ocurs[clase]; !found {
+			ocurs[clase] = 1
+		} else {
+			ocurs[clase]++
+		}
+	}
+	for _, val := range ocurs {
+		ncentroid = append(ncentroid, val)
+	}
+
+	for i := 0; i < k; i++ {
+		if !math.IsNaN(float64(centers[i][0])) {
+			for j := 0; j < len(centers[i]); j++ {
+				z := float64(centers[i][j])*std_scales[j] + mean_scales[j]
+				z2 := centers[i][j]*float32(std_scales[j]) + float32(mean_scales[j])
+				if z < 0 {
+					fmt.Println("")
+
+					fmt.Println(z)
+					fmt.Println(colnamesDiseases[j])
+					fmt.Println("centroide: ", centers[i][j])
+					fmt.Println("centroide64:", float64(centers[i][j]))
+					fmt.Println("std:  ", std_scales[j])
+					fmt.Println("mean: ", mean_scales[j])
+
+					fmt.Println(z2)
+					fmt.Print("\n\n")
+				}
+				centers[i][j] = float32(z)
+			}
+			centroids = append(centroids, pacient{Edad: centers[i][0], Genero: centers[i][1], CardioDisease: centers[i][2],
+				Diabetes: centers[i][3], RespDisease: centers[i][4],
+				Hipertension: centers[i][5], Cancer: centers[i][6]})
+		}
+	}
+	fmt.Println(centroids)
+	fmt.Println(ncentroid)
+	response := resDiseases{Centroids: centroids, Ncentroid: ncentroid}
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		http.Error(r, err.Error(), http.StatusBadRequest)
+		fmt.Println("ERROR GAA")
+		return
+	}
+	fmt.Fprintf(r, "%s", jsonResponse)
+}
+
+func groupAnalysis(r http.ResponseWriter, request *http.Request) {
+
+}
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
+	// HEART DISEASE DATASET
 	colnames, col, data = readCsvFile("cardio_train.csv")
 	_, _, xTrain = sliceCols(colnames, col, data, colnames[1:len(colnames)-1])
 	_, _, yTrain = sliceCols(colnames, col, data, []string{colnames[len(colnames)-1]})
+
+	// COVID TESTING DATASET
+	colnamesCovid, colCovid, dfCovid = readCsvFile("artifitial_covid_testing.csv")
+	_, _, xTrainCovid = sliceCols(colnamesCovid, colCovid, dfCovid, colnamesCovid[:len(colnamesCovid)-1])
+	_, _, yTrainCovid = sliceCols(colnamesCovid, colCovid, dfCovid, []string{colnamesCovid[len(colnamesCovid)-1]})
+
+	// DISEASES DATASET
+	colnamesDiseases, colDiseases, dfDiseases = readCsvFile("artifitial_pacients.csv")
 
 	//Datos de prueba
 	//xTest := []float32{22, 2, 178, 60, 110, 65, 1, 1, 0, 0, 0}
@@ -596,6 +811,9 @@ func main() {
 	//router.HandleFunc("/", RootEndpointPOST).Methods("POST")
 	router.HandleFunc("/knn", knnRequest).Methods("POST")
 	router.HandleFunc("/kmeans", kmeansRequest).Methods("POST")
+	router.HandleFunc("/covid_analysis", covidAnalysis).Methods("POST")
+	router.HandleFunc("/group_selection", groupSelection).Methods("POST")
+	router.HandleFunc("/group_analysis", groupAnalysis).Methods("POST")
 
 	fmt.Println("Now server is running on port 8000")
 	http.ListenAndServe(":8000", handlers.CORS(headers, methods, origins)(router))
