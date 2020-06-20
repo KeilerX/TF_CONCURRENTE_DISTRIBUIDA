@@ -30,12 +30,22 @@ const GroupAnalysisSchema = yup.object({
 class GroupAnalysis extends Component {
   state = {
     data: [],
+    centroids: [],
+    found: false,
+    index: 0,
   };
+
+  componentDidMount() {
+    let centroids = localStorage.getItem("centroids");
+    centroids = JSON.parse(centroids);
+    this.setState({ centroids: centroids });
+  }
 
   render() {
     const { auth } = this.props;
     if (!auth.uid) return <Redirect to="/signin" />;
-
+    const cent = this.state.centroids;
+    const index = this.state.index;
     return (
       <Formik
         initialValues={{
@@ -49,6 +59,7 @@ class GroupAnalysis extends Component {
         }}
         validationSchema={GroupAnalysisSchema}
         onSubmit={(values) => {
+          this.setState({ index: -1, found: false });
           const covid = {
             edad: parseInt(values.edad),
             genero: parseInt(values.genero),
@@ -58,28 +69,36 @@ class GroupAnalysis extends Component {
             hipertension: values.hipertension ? 1 : 0,
             cancer: values.cancer ? 1 : 0,
           };
-          const serv_url = "http://localhost:8000";
-          console.log({ covid });
-          axios({
-            method: "post",
-            url: serv_url + "/group_analysis",
-            data: { covid },
-          }).then((res) => {
-            this.setState({ data: res.data });
-            res.data.clase === 1
-              ? alert(
-                  "Usted puede sufrir de un ataque al corazón. Ocurrencias de la clase sana: " +
-                    res.data.ocurs0 +
-                    ", ocurrencias de la clase enferma: " +
-                    res.data.ocurs1
-                )
-              : alert(
-                  "Usted esta a salvo por ahora. Ocurrencias de la clase sana: " +
-                    res.data.ocurs0 +
-                    ", ocurrencias de la clase enferma: " +
-                    res.data.ocurs1
-                );
+          let distancias = [];
+          let centroids = this.state.centroids;
+          for (let i = 0; i < centroids.length; i++) {
+            distancias[i] = Math.sqrt(
+              Math.pow(centroids[i].edad - covid.edad, 2) +
+                Math.pow(centroids[i].genero - covid.genero, 2) +
+                Math.pow(
+                  centroids[i].cardio_disease - covid.cardio_disease,
+                  2
+                ) +
+                Math.pow(centroids[i].diabetes - covid.diabetes, 2) +
+                Math.pow(centroids[i].resp_disease - covid.resp_disease, 2) +
+                Math.pow(centroids[i].hipertension - covid.hipertension, 2) +
+                Math.pow(centroids[i].cancer - covid.cancer, 2)
+            );
+          }
+          let min_index = 0;
+          let min = distancias[0];
+          for (let i = 0; i < distancias.length; i++) {
+            if (distancias[i] < min) {
+              min_index = i;
+              min = distancias[i];
+            }
+          }
+          this.setState({
+            found: true,
+            index: min_index,
           });
+          console.log(distancias);
+          console.log(min_index);
         }}
       >
         {({
@@ -190,6 +209,49 @@ class GroupAnalysis extends Component {
             <button type="submit" className="btn pink lighten-1 z-depth-0">
               Resultado
             </button>
+            {this.state.found
+              ? cent.map((c, i) => {
+                  return (
+                    <div className="card" key={i}>
+                      <div
+                        style={{
+                          backgroundColor:
+                            i === index ? "rgb(84, 104, 179)" : "white",
+                        }}
+                        className="card-content"
+                      >
+                        <p>
+                          {i === index ? "PERTENECES al " : null}Centroide{" "}
+                          {i + 1}
+                        </p>
+                        <p>
+                          Edad: {Math.round(c.edad)}(años), Género:{" "}
+                          {Math.round(c.gender) === 1 ? "Mujer" : "Hombre"},{" "}
+                          {Math.round(c.cardio_disease) === 1
+                            ? "Problemas cardiovasculares: SÍ"
+                            : "Problemas cardiovasculares: NO"}
+                          ,{" "}
+                          {Math.round(c.diabetes) === 1
+                            ? "Diabetes: SÍ"
+                            : "Diabetes: NO"}
+                          ,{" "}
+                          {Math.round(c.resp_disease) === 1
+                            ? "Enfermedad respiratoria crónica: SÍ"
+                            : "Enfermedad respiratoria crónica: NO"}
+                          ,{" "}
+                          {Math.round(c.hipertension) === 1
+                            ? "Hipertensión: SÍ"
+                            : "Hipertensión: NO"}
+                          ,{" "}
+                          {Math.round(c.cancer) === 1
+                            ? "Cáncer: SÍ"
+                            : "Cáncer: NO"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              : null}
           </form>
         )}
       </Formik>
