@@ -66,6 +66,7 @@ class CoivdAnalysis extends Component {
         }}
         validationSchema={CovidAnalysisSchema}
         onSubmit={(values) => {
+          this.setState({ received: false });
           const covid = {
             edad: parseInt(values.edad),
             genero: parseInt(values.genero),

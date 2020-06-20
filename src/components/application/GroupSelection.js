@@ -114,35 +114,41 @@ class GroupSelection extends Component {
                         registros
                       </p>
                       <p>
-                        Edad: {parseInt(c.edad)}(años), Género:{" "}
-                        {parseInt(c.gender) === 1 ? "Mujer" : "Hombre"},{" "}
-                        {parseInt(c.cardio_disease) === 1
+                        Edad: {Math.round(c.edad)}(años), Género:{" "}
+                        {Math.round(c.gender) === 1 ? "Mujer" : "Hombre"},{" "}
+                        {Math.round(c.cardio_disease) === 1
                           ? "Problemas cardiovasculares"
                           : "Sin problemas cardiovasculares"}
                         ,
-                        {parseInt(c.diabetes) === 1
+                        {Math.round(c.diabetes) === 1
                           ? "Con diabetes"
                           : "Sin diabetes"}
                         ,
-                        {parseInt(c.resp_disease) === 1
+                        {Math.round(c.resp_disease) === 1
                           ? "Con enfermedad respiratoria crónica"
                           : "Sin enfermedad respiratoria crónica"}
                         ,
-                        {parseInt(c.hipertension) === 1
+                        {Math.round(c.hipertension) === 1
                           ? "Con hipertensión"
                           : "Sin hipertensión"}
                         ,{" "}
-                        {parseInt(c.cancer) === 1 ? "Con cáncer" : "Sin cáncer"}
+                        {Math.round(c.cancer) === 1
+                          ? "Con cáncer"
+                          : "Sin cáncer"}
                       </p>
-                      <button
-                        className="btn blue lighten-1 z-depth-0"
-                        onClick={this.continueToGroupAnalysis}
-                      >
-                        Siguiente
-                      </button>
                     </div>
                   );
                 })}
+              <div>
+                {!this.state.centroids && (
+                  <button
+                    className="btn blue lighten-1 z-depth-0"
+                    onClick={this.continueToGroupAnalysis}
+                  >
+                    Siguiente
+                  </button>
+                )}
+              </div>
             </div>
           </form>
         )}
