@@ -47,6 +47,7 @@ const CovidAnalysisSchema = yup.object({
 class CoivdAnalysis extends Component {
   state = {
     data: [],
+    received: false,
   };
 
   render() {
@@ -83,20 +84,7 @@ class CoivdAnalysis extends Component {
             url: serv_url + "/covid_analysis",
             data: { covid },
           }).then((res) => {
-            this.setState({ data: res.data });
-            res.data.clase === 1
-              ? alert(
-                  "Usted puede sufrir de un ataque al corazón. Ocurrencias de la clase sana: " +
-                    res.data.ocurs0 +
-                    ", ocurrencias de la clase enferma: " +
-                    res.data.ocurs1
-                )
-              : alert(
-                  "Usted esta a salvo por ahora. Ocurrencias de la clase sana: " +
-                    res.data.ocurs0 +
-                    ", ocurrencias de la clase enferma: " +
-                    res.data.ocurs1
-                );
+            this.setState({ data: res.data, received: true });
           });
         }}
       >
@@ -110,6 +98,21 @@ class CoivdAnalysis extends Component {
           setFieldValue,
         }) => (
           <form onSubmit={handleSubmit} className="blue lighten-4">
+            {this.state.data && this.state.received && (
+              <div className="card">
+                <div className="card-content">
+                  {this.state.data.clase === 1
+                    ? "Muy probable que tengas COVID-19. Ocurrencias de la clase no contagiada: " +
+                      this.state.data.ocurs0 +
+                      ", ocurrencias de la clase contagiada: " +
+                      this.state.data.ocurs1
+                    : "Es poco probable que tengas COVID-19. Ocurrencias de la clase no contagiada: " +
+                      this.state.data.ocurs0 +
+                      ", ocurrencias de la clase contagiada: " +
+                      this.state.data.ocurs1}
+                </div>
+              </div>
+            )}
             <h5 className="grey-text text-darken-3">Análisis de COVID-19</h5>
             <div className="input-field">
               <label htmlFor="edad">Edad (años)</label>
