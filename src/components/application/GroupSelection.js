@@ -10,7 +10,7 @@ const KMeansSchema = yup.object({
     .number()
     .required("El número de clusters es requerido.")
     .integer()
-    .lessThan(6, "El máximo número de clusters es de 5.")
+    .lessThan(101, "El máximo número de clusters es de 100.")
     .moreThan(1, "El mínimo número de clusters es de 2."),
   max_it: yup
     .number()
@@ -27,6 +27,7 @@ class GroupSelection extends Component {
   };
 
   continueToGroupAnalysis = (e) => {
+    localStorage.setItem("centroids", JSON.stringify(this.state.centroids));
     this.props.history.push("/group_analysis");
   };
 
@@ -120,15 +121,15 @@ class GroupSelection extends Component {
                         {Math.round(c.cardio_disease) === 1
                           ? "Problemas cardiovasculares: SÍ"
                           : "Problemas cardiovasculares: NO"}
-                        ,
+                        ,{" "}
                         {Math.round(c.diabetes) === 1
                           ? "Diabetes: SÍ"
                           : "Diabetes: NO"}
-                        ,
+                        ,{" "}
                         {Math.round(c.resp_disease) === 1
                           ? "Enfermedad respiratoria crónica: SÍ"
                           : "Enfermedad respiratoria crónica: NO"}
-                        ,
+                        ,{" "}
                         {Math.round(c.hipertension) === 1
                           ? "Hipertensión: SÍ"
                           : "Hipertensión: NO"}
