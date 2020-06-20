@@ -117,39 +117,39 @@ class GroupSelection extends Component {
                         Edad: {Math.round(c.edad)}(años), Género:{" "}
                         {Math.round(c.gender) === 1 ? "Mujer" : "Hombre"},{" "}
                         {Math.round(c.cardio_disease) === 1
-                          ? "Problemas cardiovasculares"
-                          : "Sin problemas cardiovasculares"}
+                          ? "Problemas cardiovasculares: SÍ"
+                          : "Problemas cardiovasculares: NO"}
                         ,
                         {Math.round(c.diabetes) === 1
-                          ? "Con diabetes"
-                          : "Sin diabetes"}
+                          ? "Diabetes: SÍ"
+                          : "Diabetes: NO"}
                         ,
                         {Math.round(c.resp_disease) === 1
-                          ? "Con enfermedad respiratoria crónica"
-                          : "Sin enfermedad respiratoria crónica"}
+                          ? "Enfermedad respiratoria crónica: SÍ"
+                          : "Enfermedad respiratoria crónica: NO"}
                         ,
                         {Math.round(c.hipertension) === 1
-                          ? "Con hipertensión"
-                          : "Sin hipertensión"}
+                          ? "Hipertensión: SÍ"
+                          : "Hipertensión: NO"}
                         ,{" "}
                         {Math.round(c.cancer) === 1
-                          ? "Con cáncer"
-                          : "Sin cáncer"}
+                          ? "Cáncer: SÍ"
+                          : "Cáncer: NO"}
                       </p>
                     </div>
                   );
                 })}
-              <div>
-                {!this.state.centroids && (
-                  <button
-                    className="btn blue lighten-1 z-depth-0"
-                    onClick={this.continueToGroupAnalysis}
-                  >
-                    Siguiente
-                  </button>
-                )}
-              </div>
             </div>
+            {this.state.centroids && this.state.centroids.length > 0 ? (
+              <div>
+                <button
+                  className="btn blue lighten-1 z-depth-0"
+                  onClick={this.continueToGroupAnalysis}
+                >
+                  Siguiente
+                </button>
+              </div>
+            ) : null}
           </form>
         )}
       </Formik>
