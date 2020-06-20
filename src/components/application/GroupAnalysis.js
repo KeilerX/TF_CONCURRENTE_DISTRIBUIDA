@@ -226,7 +226,7 @@ class GroupAnalysis extends Component {
                         </p>
                         <p>
                           Edad: {Math.round(c.edad)}(años), Género:{" "}
-                          {Math.round(c.gender) === 1 ? "Mujer" : "Hombre"},{" "}
+                          {Math.round(c.genero) === 1 ? "Mujer" : "Hombre"},{" "}
                           {Math.round(c.cardio_disease) === 1
                             ? "Problemas cardiovasculares: SÍ"
                             : "Problemas cardiovasculares: NO"}
