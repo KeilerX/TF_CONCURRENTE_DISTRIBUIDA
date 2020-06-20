@@ -770,6 +770,7 @@ func groupSelection(r http.ResponseWriter, request *http.Request) {
 }
 
 func groupAnalysis(r http.ResponseWriter, request *http.Request) {
+	// CALCULANDO QUÉ CENTROIDE ES EL MÁS CERCANO
 
 }
 
@@ -786,7 +787,7 @@ func main() {
 	_, _, yTrainCovid = sliceCols(colnamesCovid, colCovid, dfCovid, []string{colnamesCovid[len(colnamesCovid)-1]})
 
 	// DISEASES DATASET
-	colnamesDiseases, colDiseases, dfDiseases = readCsvFile("artifitial_pacients.csv")
+	colnamesDiseases, colDiseases, dfDiseases = readCsvFile("artifitial_pacients2.csv")
 
 	//Datos de prueba
 	//xTest := []float32{22, 2, 178, 60, 110, 65, 1, 1, 0, 0, 0}
