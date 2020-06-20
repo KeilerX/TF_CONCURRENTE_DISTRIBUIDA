@@ -100,13 +100,21 @@ class CoivdAnalysis extends Component {
           <form onSubmit={handleSubmit} className="blue lighten-4">
             {this.state.data && this.state.received && (
               <div className="card">
-                <div className="card-content">
+                <div
+                  className="card-content"
+                  style={{
+                    backgroundColor:
+                      this.state.data.clase === 1
+                        ? "rgba(243, 83, 83)"
+                        : "rgb(14, 200, 190)",
+                  }}
+                >
                   {this.state.data.clase === 1
-                    ? "Muy probable que tengas COVID-19. Ocurrencias de la clase no contagiada: " +
+                    ? "MUY PROBABLE que tengas COVID-19. Ocurrencias de la clase no contagiada: " +
                       this.state.data.ocurs0 +
                       ", ocurrencias de la clase contagiada: " +
                       this.state.data.ocurs1
-                    : "Es poco probable que tengas COVID-19. Ocurrencias de la clase no contagiada: " +
+                    : "POCO PROBABLE que tengas COVID-19. Ocurrencias de la clase no contagiada: " +
                       this.state.data.ocurs0 +
                       ", ocurrencias de la clase contagiada: " +
                       this.state.data.ocurs1}

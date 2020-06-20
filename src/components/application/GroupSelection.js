@@ -22,42 +22,12 @@ const KMeansSchema = yup.object({
 class GroupSelection extends Component {
   state = {
     data: [],
-    k: 0,
+    centroids: [],
     items_centroid: [],
-    max_it: 0,
-    submit: false,
   };
 
-  handleChange = (e) => {
-    this.setState({
-      [e.target.id]: parseInt(e.target.value),
-    });
-    console.log(e.target.value);
-  };
-
-  handleSubmit = (e) => {
-    e.preventDefault();
-    if (this.state.is_correct === true) {
-      /* this.setState({ centroids: [], items_centroid: [] });
-      const serv_url = "http://localhost:8000";
-      const k = this.state.k;
-      const max_it = this.state.max_it;
-      console.log({ k });
-      axios({
-        method: "post",
-        url: serv_url + "/kmeans",
-        data: { k, max_it },
-      }).then((res) => {
-        console.log(res);
-        this.setState({
-          centroids: res.data.centroids,
-          items_centroid: res.data.ncentroid,
-        });
-      }); */
-      console.log("Correcto");
-    } else {
-      console.log("Complete los datos");
-    }
+  continueToGroupAnalysis = (e) => {
+    this.props.history.push("/group_analysis");
   };
 
   render() {
@@ -73,26 +43,20 @@ class GroupSelection extends Component {
         validationSchema={KMeansSchema}
         onSubmit={(values) => {
           const serv_url = "http://localhost:8000";
-          const algorithm = this.state.algorithm;
-          const k = this.state.k;
-          const max_it = this.state.max_it;
+          const k = values.k;
+          const max_it = values.max_it;
           console.log({ k, max_it });
-          this.props.history.push("/group_analysis");
           axios({
             method: "post",
             url: serv_url + "/group_selection",
             data: { k, max_it },
-          })
-            .then((res) => {
-              console.log(res);
-              this.setState({
-                centroids: res.data.centroids,
-                items_centroid: res.data.ncentroid,
-              });
-            })
-            .then(() => {
-              this.props.history.push("/group_analysis");
+          }).then((res) => {
+            console.log(res);
+            this.setState({
+              centroids: res.data.centroids,
+              items_centroid: res.data.ncentroid,
             });
+          });
         }}
       >
         {({
@@ -140,6 +104,46 @@ class GroupSelection extends Component {
             <button type="submit" className="btn pink lighten-1 z-depth-0">
               Resultado
             </button>
+            <div>
+              {this.state.centroids &&
+                this.state.centroids.map((c, i) => {
+                  return (
+                    <div key={i}>
+                      <p>
+                        Centroide {i + 1} con {this.state.items_centroid[i]}{" "}
+                        registros
+                      </p>
+                      <p>
+                        Edad: {parseInt(c.edad)}(años), Género:{" "}
+                        {parseInt(c.gender) === 1 ? "Mujer" : "Hombre"},{" "}
+                        {parseInt(c.cardio_disease) === 1
+                          ? "Problemas cardiovasculares"
+                          : "Sin problemas cardiovasculares"}
+                        ,
+                        {parseInt(c.diabetes) === 1
+                          ? "Con diabetes"
+                          : "Sin diabetes"}
+                        ,
+                        {parseInt(c.resp_disease) === 1
+                          ? "Con enfermedad respiratoria crónica"
+                          : "Sin enfermedad respiratoria crónica"}
+                        ,
+                        {parseInt(c.hipertension) === 1
+                          ? "Con hipertensión"
+                          : "Sin hipertensión"}
+                        ,{" "}
+                        {parseInt(c.cancer) === 1 ? "Con cáncer" : "Sin cáncer"}
+                      </p>
+                      <button
+                        className="btn blue lighten-1 z-depth-0"
+                        onClick={this.continueToGroupAnalysis}
+                      >
+                        Siguiente
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
           </form>
         )}
       </Formik>
