@@ -42,6 +42,7 @@ class GroupSelection extends Component {
         }}
         validationSchema={KMeansSchema}
         onSubmit={(values) => {
+          this.setState({ centroids: [], items_centroid: [] });
           const serv_url = "http://localhost:8000";
           const k = values.k;
           const max_it = values.max_it;
