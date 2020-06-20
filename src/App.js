@@ -8,6 +8,9 @@ import SignUp from "./components/auth/SignUp";
 import CreateData from "./components/data/CreateData";
 import KNN from "./components/application/KNN";
 import KMeans from "./components/application/KMeans";
+import GroupSelection from "./components/application/GroupSelection";
+import GroupAnalysis from "./components/application/GroupAnalysis";
+import CovidAnalysis from "./components/application/CovidAnalysis";
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
           <Route path="/signin" component={SignIn} />
           <Route path="/signup" component={SignUp} />
           <Route path="/create" component={CreateData} />
+          <Route path="/covid_analysis" component={CovidAnalysis} />
+          <Route path="/group_selection" component={GroupSelection} />
+          <Route path="/group_analysis" component={GroupAnalysis} />
           <Route path="/knn" component={KNN} />
           <Route path="/kmeans" component={KMeans} />
         </Switch>

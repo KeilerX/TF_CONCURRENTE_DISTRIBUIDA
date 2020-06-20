@@ -26,9 +26,9 @@ class KMeans extends Component {
       const centroid = {
         id: parseInt(i),
         age: parseInt(30 + Math.random() * (100 - 30)),
+        gender: parseInt(Math.random() * 2),
         height: parseInt(140 + Math.random() * (210 - 140)),
         weight: parseInt(40 + Math.random() * (150 - 40)),
-        gender: parseInt(Math.random() * 2),
         sbp: parseInt(100 + Math.random() * (170 - 100)),
         dbp: parseInt(60 + Math.random() * (100 - 60)),
         cholesterol: parseInt(1 + Math.random() * (3 - 1)),

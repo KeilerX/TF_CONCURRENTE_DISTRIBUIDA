@@ -1,11 +1,23 @@
-import React from "react";
+import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 import { signOut } from "../../store/actions/authActions";
 
 const SignedInLinks = (props) => {
+  const open = false;
+
+  const handleButtonTf = () => {
+    open = !open;
+  };
+
   return (
     <ul className="right">
+      <li>
+        <NavLink to="/covid_analysis">Análisis Covid</NavLink>
+      </li>
+      <li>
+        <NavLink to="/group_selection">Grupo Riesgo</NavLink>
+      </li>
       <li>
         <NavLink to="/knn">KNN</NavLink>
       </li>
