@@ -1,5 +1,5 @@
 [TA2](#ta2) <br/>
-[TF Hito 1](#tfhito1)
+[TF Hito 2](#tfhito1)
 
 <a name="ta2"></a>
 ## Para la TA2:
@@ -33,7 +33,7 @@ Ir a [http://localhost:3000/kmeans](http://localhost:3000/kmeans) para probar el
 ![](https://github.com/KeilerX/TF_CONCURRENTE_DISTRIBUIDA/blob/master/imgs_test/kmeans.png)
 Se debe especificar el número de centroides (clusters) a generar.
 
-<a name="tfhito1"></a>
+<a name="tfhito2"></a>
 ## Para el Trabajo Final Hito 2
 Projecto realizado con [React App](https://github.com/facebook/create-react-app) y [Golang](https://golang.org/).
 ## Scripts disponibles
