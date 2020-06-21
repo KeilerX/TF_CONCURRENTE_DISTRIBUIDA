@@ -1,6 +1,9 @@
 Projecto realizado con [React App](https://github.com/facebook/create-react-app).
 
 # Para la TA2:
+[TA2](#ta2)
+
+<a name="ta2"></a>
 ## Scripts disponibles
 En este projecto:
 
