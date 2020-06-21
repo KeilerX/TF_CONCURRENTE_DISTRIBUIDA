@@ -31,7 +31,7 @@ Se deben completar los parámetros y seleccionar un algoritmo.
 ### kmeans
 Ir a [http://localhost:3000/kmeans](http://localhost:3000/kmeans) para probar el algoritmo KMeans.<br />
 ![](https://github.com/KeilerX/TF_CONCURRENTE_DISTRIBUIDA/blob/master/imgs_test/kmeans.png)
-Se debe especificar el número de centroides (clusters) a generar.
+Se debe especificar el número de centroides (clusters) a generar y el máximo de iteraciones a realizar.
 
 <a name="tfhito2"></a>
 ## Para el Trabajo Final Hito 2
