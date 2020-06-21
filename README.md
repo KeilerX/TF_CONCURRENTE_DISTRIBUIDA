@@ -69,4 +69,4 @@ Se debe especificar el número de grupos de riesgo (clusters) a generar y el nú
 ### Análisis de Grupos de Riesgo
 Ir a [http://localhost:3000/group_analysis](http://localhost:3000/group_analysis) para probar el Análisis de Grupos de Riesgo.<br />
 ![](https://github.com/KeilerX/TF_CONCURRENTE_DISTRIBUIDA/blob/master/imgs_test/group_analysis.png)
-Se debe completar los datos y se le indicará a que grupo, generados en **Selección de Grupos de Riesgo** se encuentra.
+Se debe completar los datos y se le indicará a que grupo, generados en **Selección de Grupos de Riesgo**, se encuentra.
