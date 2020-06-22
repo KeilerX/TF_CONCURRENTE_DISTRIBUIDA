@@ -1,5 +1,5 @@
 [TA2](#ta2) <br/>
-[TF Hito 2](#tfhito1)
+[TF Hito 2](#tfhito2)
 
 <a name="ta2"></a>
 ## Para la TA2:
