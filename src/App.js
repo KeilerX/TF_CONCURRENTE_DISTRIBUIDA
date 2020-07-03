@@ -11,6 +11,7 @@ import KMeans from "./components/application/KMeans";
 import GroupSelection from "./components/application/GroupSelection";
 import GroupAnalysis from "./components/application/GroupAnalysis";
 import CovidAnalysis from "./components/application/CovidAnalysis";
+import CreatePacient from "./components/application/CreatePacient";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/covid_analysis" component={CovidAnalysis} />
           <Route path="/group_selection" component={GroupSelection} />
           <Route path="/group_analysis" component={GroupAnalysis} />
+          <Route path="/create_pacient" component={CreatePacient} />
           <Route path="/knn" component={KNN} />
           <Route path="/kmeans" component={KMeans} />
         </Switch>
