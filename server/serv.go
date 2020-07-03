@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"math"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -486,6 +488,23 @@ var yTrainCovid [][]float32
 
 var groupsSelected []pacient
 
+type BlockChain struct {
+	Blocks []*Block
+}
+
+type Block struct {
+	Hash     []byte
+	Data     []byte
+	PrevHash []byte
+}
+
+type tmsg struct {
+	Code string
+	Addr string
+	Blk  Block
+	Bc   BlockChain
+}
+
 ////////////////           KNN
 
 type person struct {
@@ -769,9 +788,51 @@ func groupSelection(r http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(r, "%s", jsonResponse)
 }
 
-func groupAnalysis(r http.ResponseWriter, request *http.Request) {
-	// CALCULANDO QUÉ CENTROIDE ES EL MÁS CERCANO
+func registrarPaciente(r http.ResponseWriter, request *http.Request) {
+	// REGISTRANDO PACIENTE
+	go BCserver()
+	newBlock := Block{}
+	newBlock.Data = []byte("Emmanuel German")
+	msg := tmsg{"serv", "localhost:8001", newBlock, BlockChain{}}
+	temp, _ := json.Marshal(msg)
+	var newmsg tmsg
+	json.Unmarshal([]byte(temp), &newmsg)
+	fmt.Println(string(msg.Blk.Data))
 
+	remoteAddr := "localhost:8010"
+	if conn, err := net.Dial("tcp", remoteAddr); err != nil {
+		log.Println("Can't dial", remoteAddr)
+	} else {
+		defer conn.Close()
+		fmt.Println("Sending to", remoteAddr)
+		enc := json.NewEncoder(conn)
+		enc.Encode(msg)
+	}
+
+}
+func BCserver() {
+	localAddr := "localhost:8001"
+	if ln, err := net.Listen("tcp", localAddr); err != nil {
+		log.Panicln("Can't start listener on", localAddr)
+	} else {
+		defer ln.Close()
+		fmt.Println("Listeing on", localAddr)
+		if conn, err := ln.Accept(); err != nil {
+			log.Println("Can't accept", conn.RemoteAddr())
+		} else {
+			go handle(conn)
+		}
+	}
+}
+func handle(conn net.Conn) {
+	defer conn.Close()
+	r := bufio.NewReader(conn)
+	str, err := r.ReadString('\n')
+	if err == nil {
+		fmt.Println("Recibido:", str)
+	} else {
+		fmt.Println("Error al leer")
+	}
 }
 
 func main() {
@@ -802,7 +863,7 @@ func main() {
 	router.HandleFunc("/kmeans", kmeansRequest).Methods("POST")
 	router.HandleFunc("/covid_analysis", covidAnalysis).Methods("POST")
 	router.HandleFunc("/group_selection", groupSelection).Methods("POST")
-	router.HandleFunc("/group_analysis", groupAnalysis).Methods("POST")
+	router.HandleFunc("/register_pacient", registrarPaciente).Methods("POST")
 
 	fmt.Println("Now server is running on port 8000")
 	http.ListenAndServe(":8000", handlers.CORS(headers, methods, origins)(router))
