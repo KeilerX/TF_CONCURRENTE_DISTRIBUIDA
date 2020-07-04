@@ -59,14 +59,16 @@ type nodeResult struct {
 }
 
 // Las IP de los demás participantes acá, todos deberían usar el puerto 8000
-var addrs = []string{}
+var addrs = []string{"localhost:8010", "localhost:8011", "localhost:8012"}
 
 var chInfo chan map[string]Block
 var chServAns chan int
+var chProcess chan bool
 var chValidNode chan nodeResult
 var localAddr string
 var chain *BlockChain
 var consUp bool
+var mainSv bool
 
 func main() {
 
@@ -74,23 +76,37 @@ func main() {
 	fmt.Print("Local Port: ")
 	fmt.Scanf("%s\n", &lport)
 	localAddr = "localhost:" + lport
-	for {
-		var tmpPort string
-		fmt.Print("External Port: ")
-		fmt.Scanf("%s\n", &tmpPort)
-		if tmpPort != "-1" {
-			addrs = append(addrs, "localhost:"+tmpPort)
-		} else {
+	/*
+		for {
+			var tmpPort string
+			fmt.Print("External Port: ")
+			fmt.Scanf("%s\n", &tmpPort)
+			if tmpPort != "-1" {
+				addrs = append(addrs, "localhost:"+tmpPort)
+			} else {
+				break
+			}
+		}
+	*/
+	for i, ad := range addrs {
+		if ad == localAddr {
+			addrs[i] = addrs[len(addrs)-1]
+			addrs[len(addrs)-1] = ""
+			addrs = addrs[:len(addrs)-1]
 			break
 		}
 	}
 
 	chain = InitBlockChain()
 	consUp = false
+	mainSv = false
 
 	chServAns = make(chan int, 1)
 	chValidNode = make(chan nodeResult, 1)
+	chProcess = make(chan bool, 1)
 	chInfo = make(chan map[string]Block)
+
+	chProcess <- true
 	go func() { chInfo <- map[string]Block{} }()
 	server()
 
@@ -120,20 +136,26 @@ func handle(conn net.Conn) {
 		fmt.Println(msg)
 		switch msg.Code {
 		case "serv":
-
+			<-chProcess
+			consUp = true
+			mainSv = true
 			chain.AddBlock(string(msg.Blk.Data))
 			newmsg := tmsg{"consenso", localAddr, *chain.Blocks[len(chain.Blocks)-1], BlockChain{}}
+			fmt.Println("Sending this: ", *chain.Blocks[len(chain.Blocks)-1])
 
 			for _, addr := range addrs {
 				sendBlock(addr, newmsg)
 			}
 
+			concensus(conn, tmsg{})
 			svAns := <-chServAns
 			conn2, err2 := net.Dial("tcp", msg.Addr)
 			if err2 == nil {
 				defer conn2.Close()
 				fmt.Fprint(conn2, strconv.Itoa(svAns)+"\n")
 			}
+
+			chProcess <- true
 
 		case "consenso":
 			if !consUp {
@@ -156,7 +178,9 @@ func handle(conn net.Conn) {
 			sendBlock(msg.Addr, newmsg)
 		case "setBackup":
 			*chain = msg.Bc
-			chServAns <- 1
+			if mainSv {
+				chServAns <- 1
+			}
 			for _, block := range chain.Blocks {
 				fmt.Printf("Previous Hash: %x\n", block.PrevHash)
 				fmt.Printf("Data in Block: %s\n", block.Data)
@@ -169,7 +193,9 @@ func handle(conn net.Conn) {
 
 func concensus(conn net.Conn, msg tmsg) {
 	info := <-chInfo
-	info[msg.Addr] = msg.Blk
+	if msg.Addr != "" {
+		info[msg.Addr] = msg.Blk
+	}
 	if len(info) == len(addrs) {
 		eqs := 0
 		myblk := *chain.Blocks[len(chain.Blocks)-1]
@@ -183,7 +209,9 @@ func concensus(conn net.Conn, msg tmsg) {
 			for _, addr := range addrs {
 				send("valid", addr)
 			}
-			chServAns <- 1
+			if mainSv {
+				chServAns <- 1
+			}
 			for _, block := range chain.Blocks {
 				fmt.Printf("Previous Hash: %x\n", block.PrevHash)
 				fmt.Printf("Data in Block: %s\n", block.Data)
