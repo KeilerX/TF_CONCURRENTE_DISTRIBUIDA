@@ -22,6 +22,9 @@ const SignedInLinks = (props) => {
         <NavLink to="/create_pacient">Registar Paciente</NavLink>
       </li>
       <li>
+        <NavLink to="/dashboard_pacients">Lista Pacientes</NavLink>
+      </li>
+      <li>
         <NavLink to="/knn">KNN</NavLink>
       </li>
       <li>
