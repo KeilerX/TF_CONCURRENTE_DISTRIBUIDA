@@ -2,12 +2,16 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net"
 	"strconv"
+
+	firebase "firebase.google.com/go"
+	"google.golang.org/api/option"
 )
 
 type BlockChain struct {
@@ -69,6 +73,10 @@ var localAddr string
 var chain *BlockChain
 var consUp bool
 var mainSv bool
+var ctx = context.Background()
+var sa = option.WithCredentialsFile("go-react-pcd-firebase-adminsdk-dedz3-a6c0be9c21.json")
+var app, err = firebase.NewApp(ctx, nil, sa)
+var client, err2 = app.Firestore(ctx)
 
 func main() {
 
@@ -76,6 +84,16 @@ func main() {
 	fmt.Print("Local Port: ")
 	fmt.Scanf("%s\n", &lport)
 	localAddr = "localhost:" + lport
+
+	// Use a service account
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if err2 != nil {
+		log.Fatalln(err2)
+	}
+	defer client.Close()
+
 	/*
 		for {
 			var tmpPort string
