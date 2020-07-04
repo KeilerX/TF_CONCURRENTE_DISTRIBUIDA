@@ -573,6 +573,11 @@ type resDiseases struct {
 	Ncentroid []int     `json:"ncentroid"`
 }
 
+/////////////////////          REGISTRAR PACIENTE
+type body3 struct {
+	Paciente pacient `json:"pacient"`
+}
+
 func knnRequest(r http.ResponseWriter, request *http.Request) {
 	var bdy body
 	err := json.NewDecoder(request.Body).Decode(&bdy)
@@ -790,27 +795,39 @@ func groupSelection(r http.ResponseWriter, request *http.Request) {
 
 func registrarPaciente(r http.ResponseWriter, request *http.Request) {
 	// REGISTRANDO PACIENTE
-	go BCserver()
+
+	var b3 body3
+	fmt.Println("EMPIEZA DECODER")
+	err := json.NewDecoder(request.Body).Decode(&b3)
+	if err != nil {
+		http.Error(r, err.Error(), http.StatusBadRequest)
+		fmt.Println("ERROR GAA")
+		return
+	}
+	dato := b3.Paciente
+	datobytes, _ := json.Marshal(dato)
+
 	newBlock := Block{}
-	newBlock.Data = []byte("Emmanuel German")
+	newBlock.Data = datobytes
 	msg := tmsg{"serv", "localhost:8001", newBlock, BlockChain{}}
-	temp, _ := json.Marshal(msg)
-	var newmsg tmsg
-	json.Unmarshal([]byte(temp), &newmsg)
-	fmt.Println(string(msg.Blk.Data))
 
 	remoteAddr := "localhost:8010"
 	if conn, err := net.Dial("tcp", remoteAddr); err != nil {
 		log.Println("Can't dial", remoteAddr)
 	} else {
 		defer conn.Close()
+
+		chRespuesta := make(chan string, 1)
+
 		fmt.Println("Sending to", remoteAddr)
 		enc := json.NewEncoder(conn)
 		enc.Encode(msg)
+		go bcserver(chRespuesta, r)
+		fmt.Fprintf(r, "%s", <-chRespuesta)
 	}
 
 }
-func BCserver() {
+func bcserver(chr chan string, r http.ResponseWriter) {
 	localAddr := "localhost:8001"
 	if ln, err := net.Listen("tcp", localAddr); err != nil {
 		log.Panicln("Can't start listener on", localAddr)
@@ -820,16 +837,17 @@ func BCserver() {
 		if conn, err := ln.Accept(); err != nil {
 			log.Println("Can't accept", conn.RemoteAddr())
 		} else {
-			go handle(conn)
+			go handle(chr, r, conn)
 		}
 	}
 }
-func handle(conn net.Conn) {
+func handle(chr chan string, r http.ResponseWriter, conn net.Conn) {
 	defer conn.Close()
-	r := bufio.NewReader(conn)
-	str, err := r.ReadString('\n')
+	r2 := bufio.NewReader(conn)
+	str, err := r2.ReadString('\n')
 	if err == nil {
-		fmt.Println("Recibido:", str)
+		fmt.Println("Recibido: ", str)
+		chr <- str
 	} else {
 		fmt.Println("Error al leer")
 	}
