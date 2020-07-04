@@ -88,12 +88,12 @@ class CreatePacient extends Component {
                   className="card-content"
                   style={{
                     backgroundColor:
-                      this.state.data.clase === 1
-                        ? "rgba(243, 83, 83)"
-                        : "rgb(14, 200, 190)",
+                      this.state.data === 1
+                        ? "rgb(14, 200, 190)"
+                        : "rgba(243, 83, 83)",
                   }}
                 >
-                  {this.state.data.clase === 1
+                  {this.state.data === 1
                     ? "Se logró registrar al paciente con éxito."
                     : "Se produjo un error al registrar el paciente."}
                 </div>
