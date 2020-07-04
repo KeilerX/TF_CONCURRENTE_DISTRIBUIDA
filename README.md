@@ -75,4 +75,4 @@ Se debe completar los datos y se le indicará a que grupo, generados en **Selecc
 <a name="tfcompleto"></a>
 ## Para el Trabajo Final Completo:
 
-Link de video de youtube [Blockchain Golang](), en el siguiente link se encuentra la demostración de la parte de Block Chain pendiente.
+Link de video de youtube [Blockchain Golang](https://www.youtube.com/watch?v=2UkGCxtGi34), en el siguiente link se encuentra la demostración de la parte de Block Chain.
