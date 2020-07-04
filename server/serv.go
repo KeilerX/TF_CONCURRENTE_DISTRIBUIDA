@@ -502,7 +502,6 @@ type tmsg struct {
 	Code string
 	Addr string
 	Blk  Block
-	Bc   BlockChain
 }
 
 ////////////////           KNN
@@ -809,7 +808,7 @@ func registrarPaciente(r http.ResponseWriter, request *http.Request) {
 
 	newBlock := Block{}
 	newBlock.Data = datobytes
-	msg := tmsg{"serv", "localhost:8001", newBlock, BlockChain{}}
+	msg := tmsg{"serv", "localhost:8001", newBlock}
 
 	remoteAddr := "localhost:8010"
 	if conn, err := net.Dial("tcp", remoteAddr); err != nil {
