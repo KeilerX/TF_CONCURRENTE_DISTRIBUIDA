@@ -6,8 +6,8 @@ const PacientList = ({ data }) => {
   return (
     <div className="data-list section">
       {data &&
-        data.map((d) => {
-          return <PacientSummary data={d} />;
+        data.map((d, k) => {
+          return <PacientSummary key={k} data={d} />;
         })}
     </div>
   );

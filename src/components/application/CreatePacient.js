@@ -51,7 +51,7 @@ class CreatePacient extends Component {
         }}
         validationSchema={PacientSchema}
         onSubmit={(values) => {
-          this.setState({ index: -1, found: false });
+          this.setState({ received: false });
           const pacient = {
             edad: parseInt(values.edad),
             genero: parseInt(values.genero),
